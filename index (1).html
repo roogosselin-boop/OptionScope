@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OptionScope | AI-Powered Options Analysis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #0f0f16;
+            --bg-card: #13131c;
+            --bg-input: #1a1a26;
+            --border-subtle: #252532;
+            --border-accent: #3d3d50;
+            --text-primary: #f5f5f7;
+            --text-secondary: #a1a1aa;
+            --text-muted: #6e6e7a;
+            --accent-cyan: #00d4ff;
+            --accent-cyan-dim: #00a8cc;
+            --accent-blue: #0066ff;
+            --accent-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-orange: #f59e0b;
+            --font-headline: 'Playfair Display', Georgia, serif;
+            --font-body: 'Source Sans 3', -apple-system, sans-serif;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-body); background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; line-height: 1.6; }
+        .bg-gradient { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(ellipse at 20% 0%, rgba(0, 212, 255, 0.04) 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, rgba(139, 92, 246, 0.03) 0%, transparent 50%), var(--bg-primary); pointer-events: none; z-index: -1; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+        header { padding: 32px 0; border-bottom: 1px solid var(--border-subtle); }
+        .header-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .logo { font-family: var(--font-headline); font-size: 28px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.5px; }
+        .logo span { color: var(--accent-cyan); }
+        .tagline { font-size: 13px; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; }
+        .nav-tabs { display: flex; gap: 8px; margin: 48px 0 40px; border-bottom: 1px solid var(--border-subtle); }
+        .nav-tab { padding: 16px 32px; font-family: var(--font-body); font-size: 15px; font-weight: 500; color: var(--text-secondary); background: transparent; border: none; cursor: pointer; transition: all 0.2s ease; position: relative; letter-spacing: 0.3px; }
+        .nav-tab::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple)); transform: scaleX(0); transition: transform 0.2s ease; }
+        .nav-tab:hover { color: var(--text-primary); }
+        .nav-tab.active { color: var(--text-primary); }
+        .nav-tab.active::after { transform: scaleX(1); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .section-header { margin-bottom: 32px; }
+        .section-title { font-family: var(--font-headline); font-size: 36px; font-weight: 500; margin-bottom: 12px; letter-spacing: -0.5px; }
+        .section-subtitle { font-size: 16px; color: var(--text-secondary); max-width: 600px; }
+        .card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 32px; margin-bottom: 24px; }
+        .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-subtle); }
+        .card-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-blue) 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .card-title { font-family: var(--font-headline); font-size: 20px; font-weight: 500; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        .form-group.full-width { grid-column: 1 / -1; }
+        .label-row { display: flex; align-items: center; gap: 8px; }
+        label { font-size: 13px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+        .info-icon { width: 18px; height: 18px; background: var(--bg-input); border: 1px solid var(--border-accent); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--accent-cyan); cursor: help; position: relative; flex-shrink: 0; }
+        .info-icon:hover { background: var(--accent-cyan); color: var(--bg-primary); border-color: var(--accent-cyan); }
+        .tooltip { position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%); width: 280px; background: var(--bg-secondary); border: 1px solid var(--border-accent); border-radius: 8px; padding: 14px 16px; font-size: 13px; font-weight: 400; color: var(--text-secondary); text-transform: none; letter-spacing: 0; line-height: 1.5; opacity: 0; visibility: hidden; transition: all 0.2s ease; z-index: 100; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4); pointer-events: none; }
+        .tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: var(--border-accent); }
+        .tooltip strong { color: var(--text-primary); display: block; margin-bottom: 6px; font-size: 14px; }
+        .tooltip .tip { color: var(--accent-cyan); font-size: 12px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-subtle); }
+        .info-icon:hover .tooltip { opacity: 1; visibility: visible; }
+        input, select, textarea { padding: 14px 16px; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); font-family: var(--font-body); font-size: 15px; transition: all 0.2s ease; width: 100%; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent-cyan); box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1); }
+        input::placeholder { color: var(--text-muted); }
+        select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236e6e7a' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 40px; }
+        textarea { min-height: 120px; resize: vertical; }
+        .btn { padding: 14px 28px; font-family: var(--font-body); font-size: 15px; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-primary { background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-blue) 100%); color: #000; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .results-container { margin-top: 32px; }
+        .result-box { background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 28px; min-height: 200px; }
+        .result-placeholder { color: var(--text-muted); text-align: center; padding: 40px; font-style: italic; }
+        .result-content { line-height: 1.8; font-size: 15px; }
+        .result-content h3 { font-family: var(--font-headline); font-size: 18px; margin: 24px 0 12px; color: var(--accent-cyan); }
+        .result-content h3:first-child { margin-top: 0; }
+        .result-content p { margin-bottom: 12px; color: var(--text-secondary); }
+        .result-content strong { color: var(--text-primary); }
+        .score-display { text-align: center; padding: 40px; background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%); border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--border-subtle); }
+        .score-label { font-size: 13px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); margin-bottom: 12px; }
+        .score-value { font-family: var(--font-headline); font-size: 72px; font-weight: 700; line-height: 1; margin-bottom: 8px; }
+        .score-value.excellent { color: var(--accent-green); }
+        .score-value.good { color: var(--accent-cyan); }
+        .score-value.fair { color: var(--accent-orange); }
+        .score-value.poor { color: var(--accent-red); }
+        .score-verdict { font-size: 18px; font-weight: 500; }
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-top: 24px; }
+        .metric-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 20px; text-align: center; }
+        .metric-label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; }
+        .metric-value { font-family: var(--font-headline); font-size: 24px; font-weight: 600; color: var(--text-primary); }
+        .loading { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 40px; color: var(--text-secondary); }
+        .spinner { width: 24px; height: 24px; border: 2px solid var(--border-subtle); border-top-color: var(--accent-cyan); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .info-box { background: rgba(0, 212, 255, 0.06); border: 1px solid rgba(0, 212, 255, 0.15); border-radius: 8px; padding: 16px 20px; margin-bottom: 24px; font-size: 14px; color: var(--text-secondary); display: flex; gap: 12px; align-items: flex-start; }
+        .info-box-icon { color: var(--accent-cyan); font-size: 18px; line-height: 1; }
+        .beginner-box { background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(0, 212, 255, 0.08) 100%); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+        .beginner-box h3 { font-family: var(--font-headline); font-size: 18px; margin-bottom: 12px; color: var(--text-primary); }
+        .beginner-box p { color: var(--text-secondary); font-size: 14px; line-height: 1.7; }
+        .beginner-box .quick-tips { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 16px; }
+        .beginner-box .tip-item { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--text-secondary); }
+        .beginner-box .tip-icon { color: var(--accent-cyan); font-size: 16px; }
+        .greeks-explainer { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 20px; margin-top: 16px; }
+        .greeks-explainer h4 { font-family: var(--font-headline); font-size: 16px; margin-bottom: 12px; color: var(--accent-cyan); }
+        .greek-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border-subtle); font-size: 13px; }
+        .greek-item:last-child { border-bottom: none; }
+        .greek-symbol { font-weight: 700; color: var(--accent-purple); min-width: 70px; }
+        .greek-desc { color: var(--text-secondary); }
+        footer { margin-top: 80px; padding: 32px 0; border-top: 1px solid var(--border-subtle); text-align: center; color: var(--text-muted); font-size: 13px; }
+        @media (max-width: 768px) {
+            .header-content { flex-direction: column; gap: 8px; text-align: center; }
+            .nav-tabs { justify-content: center; flex-wrap: wrap; }
+            .nav-tab { padding: 12px 20px; font-size: 14px; }
+            .section-title { font-size: 28px; }
+            .card { padding: 20px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .score-value { font-size: 56px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Option<span>Scope</span></div>
+                <div class="tagline">AI-Powered Options Intelligence</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <nav class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('write')">Write Options</button>
+            <button class="nav-tab" onclick="switchTab('research')">Research Options</button>
+        </nav>
+
+        <!-- WRITE OPTIONS TAB -->
+        <div id="write-tab" class="tab-content active">
+            <div class="section-header">
+                <h1 class="section-title">Write an Option Contract</h1>
+                <p class="section-subtitle">Let AI generate a comprehensive options strategy based on your stock selection and timeline.</p>
+            </div>
+            <div class="beginner-box">
+                <h3>🎓 New to Options?</h3>
+                <p>"Writing" an option means you're the seller—you receive premium upfront in exchange for an obligation. This is different from buying options where you pay premium for the right (not obligation) to buy or sell.</p>
+                <div class="quick-tips">
+                    <div class="tip-item"><span class="tip-icon">📈</span><span><strong>Call Option:</strong> Bet that a stock will go UP</span></div>
+                    <div class="tip-item"><span class="tip-icon">📉</span><span><strong>Put Option:</strong> Bet that a stock will go DOWN</span></div>
+                    <div class="tip-item"><span class="tip-icon">⏰</span><span><strong>Expiration:</strong> When the contract ends</span></div>
+                    <div class="tip-item"><span class="tip-icon">💰</span><span><strong>Premium:</strong> The price paid for the option</span></div>
+                </div>
+            </div>
+            <div class="info-box">
+                <span class="info-box-icon">ℹ</span>
+                <span>Our AI analyzes market conditions, volatility patterns, and risk factors to provide detailed option writing recommendations.</span>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">📝</div>
+                    <h2 class="card-title">Contract Parameters</h2>
+                </div>
+                <form id="write-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <div class="label-row">
+                                <label for="stock-symbol">Stock Symbol</label>
+                                <span class="info-icon">i
+                                    <div class="tooltip">
+                                        <strong>Stock Ticker Symbol</strong>
+                                        The short code that identifies a company on the stock exchange.
+                                        <div class="tip">💡 Examples: AAPL (Apple), TSLA (Tesla), NVDA (Nvidia)</div>
+                                    </div>
+                                </span>
+                            </div>
+                            <input type="text" id="stock-symbol" placeholder="e.g., AAPL, TSLA, NVDA" required>
+                        </div>
+                        <div class="form-group">
+                            <div class="label-row">
+                                <label for="option-type">Option Type</label>
+                                <span class="info-icon">i
+                                    <div class="tooltip">
+                                        <strong>Type of Option Strategy</strong>
+                                        • Call: Right to BUY at strike price<br>
+                                        • Put: Right to SELL at strike price<br>
+                                        • Covered Call: Sell calls on stock you own<br>
+                                        • Cash-Secured Put: Sell puts with cash ready
+                                        <div class="tip">💡 Covered calls and cash-secured puts are safer for beginners</div>
+                                    </div>
+                                </span>
+                            </div>
+                            <select id="option-type" required>
+                                <option value="call">Call Option</option>
+                                <option value="put">Put Option</option>
+                                <option value="covered-call">Covered Call</option>
+                                <option value="cash-secured-put">Cash-Secured Put</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <div class="label-row">
+                                <label for="expiration">Time to Expiration</label>
+                                <span class="info-icon">i
+                                    <div class="tooltip">
+                                        <strong>When the Option Expires</strong>
+                                        Shorter = faster time decay (good for sellers). Longer = more premium but more risk.
+                                        <div class="tip">💡 30-45 days is a popular "sweet spot" for option writers</div>
+                                    </div>
+                                </span>
+                            </div>
+                            <select id="expiration" required>
+                                <option value="1-week">1 Week</option>
+                                <option value="2-weeks">2 Weeks</option>
+                                <option value="1-month" selected>1 Month</option>
+                                <option value="45-days">45 Days</option>
+                                <option value="2-months">2 Months</option>
+                                <option value="3-months">3 Months</option>
+                                <option value="6-months">6 Months</option>
+                                <option value="1-year">1 Year (LEAPS)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <div class="label-row">
+                                <label for="risk-tolerance">Risk Tolerance</label>
+                                <span class="info-icon">i
+                                    <div class="tooltip">
+                                        <strong>Your Comfort with Risk</strong>
+                                        • Conservative: Lower risk, lower reward<br>
+                                        • Moderate: Balanced approach<br>
+                                        • Aggressive: Higher risk, higher potential
+                                        <div class="tip">💡 If you're new, start conservative!</div>
+                                    </div>
+                                </span>
+                            </div>
+                            <select id="risk-tolerance">
+                                <option value="conservative">Conservative</option>
+                                <option value="moderate" selected>Moderate</option>
+                                <option value="aggressive">Aggressive</option>
+                            </select>
+                        </div>
+                        <div class="form-group full-width">
+                            <div class="label-row">
+                                <label for="additional-context">Additional Context (Optional)</label>
+                                <span class="info-icon">i
+                                    <div class="tooltip">
+                                        <strong>Extra Information</strong>
+                                        Tell the AI about your goals, budget, existing positions, or market outlook.
+                                        <div class="tip">💡 Example: "I already own 100 shares" or "I'm bullish"</div>
+                                    </div>
+                                </span>
+                            </div>
+                            <textarea id="additional-context" placeholder="Any specific goals, market outlook, or constraints..."></textarea>
+                        </div>
+                    </div>
+                    <div style="margin-top: 24px;">
+                        <button type="submit" class="btn btn-primary" id="write-btn">
+                            <span>Generate Strategy</span>
+                            <span>→</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="results-container">
+                <div class="result-box">
+                    <div id="write-result" class="result-placeholder">Your AI-generated options strategy will appear here...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESEARCH OPTIONS TAB -->
+        <div id="research-tab" class="tab-content">
+            <div class="section-header">
+                <h1 class="section-title">Research an Option</h1>
+                <p class="section-subtitle">Enter option details to calculate fair value using Black-Scholes and receive a comprehensive quality score.</p>
+            </div>
+            <div class="beginner-box">
+                <h3>🎓 Understanding Option Pricing</h3>
+                <p>The Black-Scholes model calculates what an option "should" be worth based on math. By comparing this to the actual price, you can spot potentially over or underpriced options. Just fill in the fields below!</p>
+                <div class="quick-tips">
+                    <div class="tip-item"><span class="tip-icon">🎯</span><span><strong>Strike Price:</strong> The price you can buy/sell at</span></div>
+                    <div class="tip-item"><span class="tip-icon">📊</span><span><strong>Volatility:</strong> How much the stock moves around</span></div>
+                    <div class="tip-item"><span class="tip-icon">💵</span><span><strong>Premium:</strong> What the option costs right now</span></div>
+                    <div class="tip-item"><span class="tip-icon">🏦</span><span><strong>Risk-Free Rate:</strong> Current interest rates (~5%)</span></div>
+                </div>
+            </div>
+            <div class="info-box">
+                <span class="info-box-icon">ℹ</span>
+                <span>We calculate theoretical value, Greeks, and provide an overall score to help you make informed decisions.</span>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🔍</div>
+                    <h2 class="card-title">Option Details</h2>
+                </div>
+                <form id="research-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <div class="label-row">
+                                <label for="r-stock-price">Current Stock Price ($)</label>
+                                <span class="info-icon">i
+                                    <div class="tooltip">
+                                        <strong>Current Stock Price</strong>
+                                        The price the stock is trading at RIGHT NOW. Find this on any stock website or broker.
+                                        <div class="tip">💡 Search "[ticker] stock price" on Google</div>
+                                    </div>
+                                </span>
+                            </div>
+                            <input type="number" id="r-stock-price" step="0.01" placeholder="150.00" required>
+                        </div>
+                        <div class="form-group">
+                            <div class="label-row">
+                                <label for="r-strike-price">Strike Price ($)</label>
+                                <span class="info-icon">i
+                                    <div class="tooltip">
+                                        <strong>Strike Price</strong>
+                                        The price at which you can buy (call) or sell (put) the stock. Set when the option is created.
+                                        <div class="tip">💡 Found in the option chain: "$150 Call" or "$145 Put"</div>
+                                    </div>
+                                </span>
+                            </div>
+                            <input type="number" id="r-strike-price" step="0.01" placeholder="155.00" required>
+                        </div>
+                        <div class="form-group">
+                            <div class="label-row">
+                                <label for="r-option-price">Option Premium ($)</label>
+                                <span class="info-icon">i
+                                    <div class="tooltip">
+                                        <strong>Option Premium (Price)</strong>
+                                        What the option is currently selling for. The price to buy it (or receive if selling).
+                                        <div class="tip">💡 Prices are per share. $5.50 × 100 shares = $550 per contract</div>
+                                    </div>
+                                </span>
+                            </div>
+                            <input type="number" id="r-option-price" step="0.01" placeholder="5.50" required>
+                        </div>
+                        <div class="form-group">
+                            <div class="label-row">
+                                <label for="r-days-expiry">Days to Expiration</label>
+                                <span class="info-icon">i
+                                    <div class="tooltip">
+                                        <strong>Days Until Expiration</strong>
+                                        How many calendar days until this option expires and becomes worthless (if out of the money).
+                                        <div class="tip">💡 Your broker shows expiration dates. Many show "X DTE"</div>
+                                    </div>
+                                </span>
+                            </div>
+                            <input type="number" id="r-days-expiry" placeholder="30" required>
+                        </div>
+                        <div class="form-group">
+                            <div class="label-row">
+                                <label for="r-volatility">Implied Volatility (%)</label>
+                                <span class="info-icon">i
+                                    <div class="tooltip">
+                                        <strong>Implied Volatility (IV)</strong>
+                                        How much the market expects the stock to move. Higher IV = more expensive options.
+                                        <div class="tip">💡 Found in option chain as "IV". Typical: 15-50%. Meme stocks: 100%+</div>
+                                    </div>
+                                </span>
+                            </div>
+                            <input type="number" id="r-volatility" step="0.1" placeholder="25.0" required>
+                        </div>
+                        <div class="form-group">
+                            <div class="label-row">
+                                <label for="r-interest-rate">Risk-Free Rate (%)</label>
+                                <span class="info-icon">i
+                                    <div class="tooltip">
+                                        <strong>Risk-Free Interest Rate</strong>
+                                        Current interest rate on "safe" investments like US Treasury bonds. Used as baseline.
+                                        <div class="tip">💡 Currently around 4-5%. You can usually leave this default.</div>
+                                    </div>
+                                </span>
+                            </div>
+                            <input type="number" id="r-interest-rate" step="0.01" value="5.0" required>
+                        </div>
+                        <div class="form-group">
+                            <div class="label-row">
+                                <label for="r-option-type">Option Type</label>
+                                <span class="info-icon">i
+                                    <div class="tooltip">
+                                        <strong>Call vs Put</strong>
+                                        • Call: You want the stock to go UP<br>
+                                        • Put: You want the stock to go DOWN
+                                        <div class="tip">💡 Check which type in your option chain</div>
+                                    </div>
+                                </span>
+                            </div>
+                            <select id="r-option-type" required>
+                                <option value="call">Call</option>
+                                <option value="put">Put</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <div class="label-row">
+                                <label for="r-position">Your Position</label>
+                                <span class="info-icon">i
+                                    <div class="tooltip">
+                                        <strong>Buying vs Selling</strong>
+                                        • Buying: You pay premium, limited risk<br>
+                                        • Selling: You receive premium, more risk
+                                        <div class="tip">💡 This affects scoring—good for buyers ≠ good for sellers!</div>
+                                    </div>
+                                </span>
+                            </div>
+                            <select id="r-position">
+                                <option value="buy">Buying</option>
+                                <option value="sell">Selling/Writing</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="margin-top: 24px;">
+                        <button type="submit" class="btn btn-primary" id="research-btn">
+                            <span>Analyze Option</span>
+                            <span>→</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="results-container">
+                <div id="research-result">
+                    <div class="result-box">
+                        <div class="result-placeholder">Enter option details above to see analysis and score...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>OptionScope uses the Black-Scholes model and AI analysis. For educational purposes only—not financial advice.</p>
+        </div>
+    </footer>
+
+    <script>
+        // =====================================================
+        // CONFIGURATION - ADD YOUR ANTHROPIC API KEY HERE
+        // =====================================================
+        const ANTHROPIC_API_KEY = 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 ;
+        // =====================================================
+
+        // Tab Switching Function
+        function switchTab(tabName) {
+            // Update buttons
+            document.querySelectorAll('.nav-tab').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+
+        // Black-Scholes Implementation
+        function normalCDF(x) {
+            const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741, a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+            const sign = x < 0 ? -1 : 1;
+            x = Math.abs(x) / Math.sqrt(2);
+            const t = 1.0 / (1.0 + p * x);
+            const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+            return 0.5 * (1.0 + sign * y);
+        }
+
+        function blackScholes(S, K, T, r, sigma, optionType) {
+            const d1 = (Math.log(S / K) + (r + sigma * sigma / 2) * T) / (sigma * Math.sqrt(T));
+            const d2 = d1 - sigma * Math.sqrt(T);
+            const sqrtT = Math.sqrt(T);
+            const expRT = Math.exp(-r * T);
+            const nd1 = normalCDF(d1), nd2 = normalCDF(d2);
+            const nnd1 = normalCDF(-d1), nnd2 = normalCDF(-d2);
+            const pdf_d1 = Math.exp(-d1 * d1 / 2) / Math.sqrt(2 * Math.PI);
+            
+            let price, delta, theta, rho;
+            if (optionType === 'call') {
+                price = S * nd1 - K * expRT * nd2;
+                delta = nd1;
+                theta = (-S * pdf_d1 * sigma / (2 * sqrtT) - r * K * expRT * nd2) / 365;
+                rho = K * T * expRT * nd2 / 100;
+            } else {
+                price = K * expRT * nnd2 - S * nnd1;
+                delta = nd1 - 1;
+                theta = (-S * pdf_d1 * sigma / (2 * sqrtT) + r * K * expRT * nnd2) / 365;
+                rho = -K * T * expRT * nnd2 / 100;
+            }
+            const gamma = pdf_d1 / (S * sigma * sqrtT);
+            const vega = S * pdf_d1 * sqrtT / 100;
+            return { price, delta, gamma, theta, vega, rho };
+        }
+
+        function calculateScore(theoreticalPrice, actualPrice, position, delta, theta, iv) {
+            let score = 50;
+            let factors = [];
+            const priceDiff = ((theoreticalPrice - actualPrice) / theoreticalPrice) * 100;
+            
+            if (position === 'buy') {
+                if (priceDiff > 10) { score += 25; factors.push({ text: 'Significantly underpriced', impact: '+25' }); }
+                else if (priceDiff > 5) { score += 15; factors.push({ text: 'Moderately underpriced', impact: '+15' }); }
+                else if (priceDiff > 0) { score += 5; factors.push({ text: 'Slightly underpriced', impact: '+5' }); }
+                else if (priceDiff > -5) { score -= 5; factors.push({ text: 'Slightly overpriced', impact: '-5' }); }
+                else if (priceDiff > -10) { score -= 15; factors.push({ text: 'Moderately overpriced', impact: '-15' }); }
+                else { score -= 25; factors.push({ text: 'Significantly overpriced', impact: '-25' }); }
+            } else {
+                if (priceDiff < -10) { score += 25; factors.push({ text: 'Excellent premium received', impact: '+25' }); }
+                else if (priceDiff < -5) { score += 15; factors.push({ text: 'Good premium received', impact: '+15' }); }
+                else if (priceDiff < 0) { score += 5; factors.push({ text: 'Fair premium received', impact: '+5' }); }
+                else if (priceDiff < 5) { score -= 5; factors.push({ text: 'Slightly low premium', impact: '-5' }); }
+                else { score -= 15; factors.push({ text: 'Low premium for risk', impact: '-15' }); }
+            }
+            
+            const absDelta = Math.abs(delta);
+            if (absDelta > 0.3 && absDelta < 0.7) { score += 10; factors.push({ text: 'Balanced delta exposure', impact: '+10' }); }
+            else if (absDelta > 0.2 && absDelta < 0.8) { score += 5; factors.push({ text: 'Acceptable delta range', impact: '+5' }); }
+            
+            if (position === 'sell' && theta < -0.05) { score += 10; factors.push({ text: 'Strong theta decay benefit', impact: '+10' }); }
+            else if (position === 'buy' && theta > -0.02) { score += 5; factors.push({ text: 'Manageable theta decay', impact: '+5' }); }
+            
+            if (iv > 50) {
+                if (position === 'sell') { score += 10; factors.push({ text: 'High IV benefits sellers', impact: '+10' }); }
+                else { score -= 10; factors.push({ text: 'High IV increases cost', impact: '-10' }); }
+            } else if (iv < 20) {
+                if (position === 'buy') { score += 10; factors.push({ text: 'Low IV is favorable', impact: '+10' }); }
+                else { score -= 5; factors.push({ text: 'Low IV reduces premium', impact: '-5' }); }
+            }
+            
+            score = Math.max(0, Math.min(100, score));
+            let verdict, scoreClass;
+            if (score >= 75) { verdict = 'Excellent Opportunity'; scoreClass = 'excellent'; }
+            else if (score >= 60) { verdict = 'Good Opportunity'; scoreClass = 'good'; }
+            else if (score >= 40) { verdict = 'Fair - Proceed with Caution'; scoreClass = 'fair'; }
+            else { verdict = 'Poor - Consider Alternatives'; scoreClass = 'poor'; }
+            
+            return { score, verdict, scoreClass, factors, priceDiff };
+        }
+
+        // Research Form Handler
+        document.getElementById('research-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const S = parseFloat(document.getElementById('r-stock-price').value);
+            const K = parseFloat(document.getElementById('r-strike-price').value);
+            const optionPrice = parseFloat(document.getElementById('r-option-price').value);
+            const days = parseInt(document.getElementById('r-days-expiry').value);
+            const iv = parseFloat(document.getElementById('r-volatility').value);
+            const r = parseFloat(document.getElementById('r-interest-rate').value) / 100;
+            const optionType = document.getElementById('r-option-type').value;
+            const position = document.getElementById('r-position').value;
+            
+            const T = days / 365;
+            const sigma = iv / 100;
+            const bs = blackScholes(S, K, T, r, sigma, optionType);
+            const scoreData = calculateScore(bs.price, optionPrice, position, bs.delta, bs.theta, iv);
+            
+            const intrinsicValue = optionType === 'call' ? Math.max(0, S - K) : Math.max(0, K - S);
+            const timeValue = optionPrice - intrinsicValue;
+            const moneyness = optionType === 'call'
+                ? (S > K ? 'In The Money' : S < K ? 'Out of The Money' : 'At The Money')
+                : (S < K ? 'In The Money' : S > K ? 'Out of The Money' : 'At The Money');
+            
+            let factorsHTML = scoreData.factors.map(f => 
+                '<div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-subtle);"><span>' + f.text + '</span><span style="color: ' + (f.impact.startsWith('+') ? 'var(--accent-green)' : 'var(--accent-red)') + '; font-weight: 600;">' + f.impact + '</span></div>'
+            ).join('');
+            
+            document.getElementById('research-result').innerHTML = 
+                '<div class="score-display"><div class="score-label">Option Quality Score</div><div class="score-value ' + scoreData.scoreClass + '">' + Math.round(scoreData.score) + '</div><div class="score-verdict">' + scoreData.verdict + '</div></div>' +
+                '<div class="metrics-grid">' +
+                '<div class="metric-card"><div class="metric-label">Theoretical Value</div><div class="metric-value">$' + bs.price.toFixed(2) + '</div></div>' +
+                '<div class="metric-card"><div class="metric-label">Market Price</div><div class="metric-value">$' + optionPrice.toFixed(2) + '</div></div>' +
+                '<div class="metric-card"><div class="metric-label">Price Difference</div><div class="metric-value" style="color: ' + (scoreData.priceDiff >= 0 ? 'var(--accent-green)' : 'var(--accent-red)') + '">' + (scoreData.priceDiff >= 0 ? '+' : '') + scoreData.priceDiff.toFixed(1) + '%</div></div>' +
+                '<div class="metric-card"><div class="metric-label">Moneyness</div><div class="metric-value" style="font-size: 14px;">' + moneyness + '</div></div>' +
+                '</div>' +
+                '<div class="card" style="margin-top: 24px;"><div class="card-header"><div class="card-icon">📊</div><h2 class="card-title">The Greeks</h2></div>' +
+                '<div class="metrics-grid">' +
+                '<div class="metric-card"><div class="metric-label">Delta (Δ)</div><div class="metric-value">' + bs.delta.toFixed(4) + '</div></div>' +
+                '<div class="metric-card"><div class="metric-label">Gamma (Γ)</div><div class="metric-value">' + bs.gamma.toFixed(4) + '</div></div>' +
+                '<div class="metric-card"><div class="metric-label">Theta (Θ)</div><div class="metric-value">' + bs.theta.toFixed(4) + '</div></div>' +
+                '<div class="metric-card"><div class="metric-label">Vega (ν)</div><div class="metric-value">' + bs.vega.toFixed(4) + '</div></div>' +
+                '<div class="metric-card"><div class="metric-label">Rho (ρ)</div><div class="metric-value">' + bs.rho.toFixed(4) + '</div></div>' +
+                '<div class="metric-card"><div class="metric-label">Time Value</div><div class="metric-value">$' + timeValue.toFixed(2) + '</div></div>' +
+                '</div>' +
+                '<div class="greeks-explainer"><h4>📚 What Do These Mean?</h4>' +
+                '<div class="greek-item"><span class="greek-symbol">Delta (Δ)</span><span class="greek-desc">How much the option price moves for every $1 the stock moves. Delta of 0.50 = +$0.50 per $1 stock increase.</span></div>' +
+                '<div class="greek-item"><span class="greek-symbol">Gamma (Γ)</span><span class="greek-desc">How fast delta changes. High gamma = delta shifts quickly as stock moves.</span></div>' +
+                '<div class="greek-item"><span class="greek-symbol">Theta (Θ)</span><span class="greek-desc">Time decay—how much value the option loses each day. Negative = losing value (bad for buyers, good for sellers).</span></div>' +
+                '<div class="greek-item"><span class="greek-symbol">Vega (ν)</span><span class="greek-desc">Sensitivity to volatility. How much price changes for each 1% change in implied volatility.</span></div>' +
+                '<div class="greek-item"><span class="greek-symbol">Rho (ρ)</span><span class="greek-desc">Sensitivity to interest rates. Usually least important for short-term options.</span></div>' +
+                '</div></div>' +
+                '<div class="card" style="margin-top: 24px;"><div class="card-header"><div class="card-icon">⚖️</div><h2 class="card-title">Score Breakdown</h2></div><div style="padding: 8px 0;">' + factorsHTML + '</div></div>';
+        });
+
+        // Write Options Form - Anthropic API Call
+        document.getElementById('write-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const symbol = document.getElementById('stock-symbol').value.toUpperCase();
+            const optionType = document.getElementById('option-type').value;
+            const expiration = document.getElementById('expiration').value;
+            const riskTolerance = document.getElementById('risk-tolerance').value;
+            const additionalContext = document.getElementById('additional-context').value;
+            
+            const resultDiv = document.getElementById('write-result');
+            const btn = document.getElementById('write-btn');
+            
+            resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div><span>Generating options strategy...</span></div>';
+            btn.disabled = true;
+
+            const systemPrompt = 'You are an expert options trading analyst. Explain everything in beginner-friendly terms. When you use technical terms, briefly explain what they mean. Format your response with clear sections: Strategy Overview, Recommended Strike Selection, Risk Analysis, Profit/Loss Scenarios, Key Considerations, and Suggested Entry Criteria. Be specific with numbers. Always emphasize risk management.';
+
+            const userPrompt = 'Generate a detailed ' + optionType + ' option strategy for ' + symbol + ' with approximately ' + expiration + ' until expiration. Risk Tolerance: ' + riskTolerance + '. ' + (additionalContext ? 'Additional Context: ' + additionalContext : '') + ' Provide beginner-friendly analysis with specific strike price guidance, premium expectations, risk analysis, entry/exit criteria, and adjustment strategies.';
+
+            try {
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': ANTHROPIC_API_KEY,
+                        'anthropic-version': '2023-06-01',
+                        'anthropic-dangerous-direct-browser-access': 'true'
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 2000,
+                        system: systemPrompt,
+                        messages: [{ role: 'user', content: userPrompt }]
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error?.message || 'API request failed');
+                }
+
+                const data = await response.json();
+                const content = data.content[0].text;
+                const formattedContent = content
+                    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+                    .replace(/^## (.+)$/gm, '<h3>$1</h3>')
+                    .replace(/^# (.+)$/gm, '<h3>$1</h3>')
+                    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\n\n/g, '</p><p>')
+                    .replace(/\n/g, '<br>');
+                
+                resultDiv.innerHTML = '<div class="result-content"><p>' + formattedContent + '</p></div>';
+            } catch (error) {
+                resultDiv.innerHTML = '<div style="color: var(--accent-red); padding: 20px; text-align: center;"><p style="margin-bottom: 12px;"><strong>Error generating strategy</strong></p><p style="color: var(--text-secondary); font-size: 14px;">' + error.message + '</p><p style="color: var(--text-muted); font-size: 13px; margin-top: 16px;">Make sure you have added your Anthropic API key in the code.</p></div>';
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
